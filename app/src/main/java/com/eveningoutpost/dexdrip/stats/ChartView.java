@@ -1,120 +1,138 @@
 package com.eveningoutpost.dexdrip.stats;
 
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.RectF;
+import android.util.AttributeSet;
 import android.util.DisplayMetrics;
-import com.eveningoutpost.dexdrip.models.UserError.Log;
 import android.view.View;
 
-/**
- * Created by adrian on 30/06/15.
- */
 public class ChartView extends View {
-
-    private RangeData rangeData = null;
-    private boolean ranteDataCalculating = false;
-    private Resources resources;
+    private int inRange = 0;
+    private int aboveRange = 0;
+    private int belowRange = 0;
+    private boolean calculating = false;
 
     public ChartView(Context context) {
         super(context);
-        resources = context.getResources();
+    }
 
+    public ChartView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public void setRangeData(int inRange, int aboveRange, int belowRange) {
+        this.inRange = inRange;
+        this.aboveRange = aboveRange;
+        this.belowRange = belowRange;
+        calculating = false;
+        postInvalidate();
+    }
+
+    public void setCalculating() {
+        calculating = true;
+        postInvalidate();
+    }
+
+    private int dp2px(float dp) {
+        DisplayMetrics metrics = getResources().getDisplayMetrics();
+        return (int) (dp * (metrics.densityDpi / 160f));
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        Log.d("DrawStats", "onDraw - ChartView");
         super.onDraw(canvas);
-
-        RangeData rd = getMaybeRangeData();
-
-        if (rd == null) {
-            Log.d("DrawStats", "ChartView - onDraw if");
-
+        if (calculating) {
             Paint myPaint = new Paint();
             myPaint.setColor(Color.WHITE);
             myPaint.setAntiAlias(true);
             myPaint.setStyle(Paint.Style.STROKE);
             myPaint.setTextSize(dp2px(15));
             canvas.drawText("Calculating...", dp2px(30), canvas.getHeight() / 2, myPaint);
-        } else {
-            Log.d("DrawStats", "onDraw else");
-
-            if ((rd.aboveRange + rd.belowRange + rd.inRange) == 0) {
-                Paint myPaint = new Paint();
-                myPaint.setColor(Color.WHITE);
-                myPaint.setAntiAlias(true);
-                myPaint.setStyle(Paint.Style.STROKE);
-                myPaint.setTextSize(dp2px(15));
-                canvas.drawText("Not enough data!", dp2px(30), canvas.getHeight() / 2, myPaint);
-                return;
-            }
-
-            int side = Math.min((canvas.getWidth() - 10), (canvas.getHeight() - 10));
-            RectF rect = new RectF((canvas.getWidth() - side) / 2, (canvas.getHeight() - side) / 2, (canvas.getWidth() - side) / 2 + side, (canvas.getHeight() - side) / 2 + side);
+            return;
+        }
+        int total = aboveRange + belowRange + inRange;
+        if (total == 0) {
             Paint myPaint = new Paint();
-            myPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+            myPaint.setColor(Color.WHITE);
             myPaint.setAntiAlias(true);
-
-
-            float inDeg = rd.inRange * 360f / (rd.inRange + rd.belowRange + rd.aboveRange);
-            float lowDeg = rd.belowRange * 360f / (rd.inRange + rd.belowRange + rd.aboveRange);
-            float highDeg = rd.aboveRange * 360f / (rd.inRange + rd.belowRange + rd.aboveRange);
-
-            Log.d("DrawStats", "in,low, high degree: " + inDeg + " " + lowDeg + " " + highDeg);
-
-            myPaint.setColor(android.graphics.Color.RED);
-            canvas.drawArc(rect, -90, lowDeg, true, myPaint);
-            myPaint.setColor(Color.GREEN);
-            canvas.drawArc(rect, -90 + lowDeg, inDeg, true, myPaint);
-            myPaint.setColor(Color.YELLOW);
-            canvas.drawArc(rect, -90 + lowDeg + inDeg, highDeg, true, myPaint);
+            myPaint.setStyle(Paint.Style.STROKE);
+            myPaint.setTextSize(dp2px(15));
+            canvas.drawText("Not enough data!", dp2px(30), canvas.getHeight() / 2, myPaint);
+            return;
         }
-
-
-    }
-
-
-    public synchronized void setRangeData(RangeData rd) {
-        rangeData = rd;
-        postInvalidate();
-    }
-
-    private int dp2px(float dp) {
-        DisplayMetrics metrics = resources.getDisplayMetrics();
-        int px = (int) (dp * (metrics.densityDpi / 160f));
-        return px;
-    }
-
-    //return either RangeData or start a calculation if not already started
-    public synchronized RangeData getMaybeRangeData() {
-        if (!ranteDataCalculating) {
-            ranteDataCalculating = true;
-            Thread thread = new Thread() {
-                @Override
-                public void run() {
-                    super.run();
-                    RangeData rd = new RangeData();
-                    rd.aboveRange = DBSearchUtil.noReadingsAboveRange(getContext());
-                    rd.belowRange = DBSearchUtil.noReadingsBelowRange(getContext());
-                    rd.inRange = DBSearchUtil.noReadingsInRange(getContext());
-                    setRangeData(rd);
-                }
-            };
-            thread.start();
+        int barWidth = dp2px(160);
+        int barHeight = Math.min(canvas.getHeight() - dp2px(40), (canvas.getWidth() / 3) * 2);
+        int left = (canvas.getWidth() - barWidth) / 2;
+        int top = (canvas.getHeight() - barHeight) / 2;
+        int right = left + barWidth;
+        int bottom = top + barHeight;
+        float belowPct = (float) belowRange / total;
+        float inPct = (float) inRange / total;
+        float abovePct = (float) aboveRange / total;
+        int belowHeight = Math.round(barHeight * belowPct);
+        int inHeight = Math.round(barHeight * inPct);
+        int aboveHeight = barHeight - belowHeight - inHeight;
+        Paint paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStyle(Paint.Style.FILL);
+        float radius = 5f;
+        RectF belowRect = new RectF(left, bottom - belowHeight, right, bottom);
+        if (belowHeight > 0) {
+            paint.setColor(Color.RED);
+            if (belowHeight < radius) {
+                canvas.drawRoundRect(belowRect, radius, radius, paint);
+            } else {
+                canvas.save();
+                canvas.clipRect(left, bottom - belowHeight, right, bottom - radius);
+                canvas.drawRect(belowRect, paint);
+                canvas.restore();
+                RectF roundRect = new RectF(left, bottom - radius * 2, right, bottom);
+                canvas.drawRoundRect(roundRect, radius, radius, paint);
+            }
         }
-        //will return null if not precalculated
-        return rangeData;
+        if (inHeight > 0) {
+            paint.setColor(Color.GREEN);
+            canvas.drawRect(left, bottom - belowHeight - inHeight, right, bottom - belowHeight, paint);
+        }
+        RectF aboveRect = new RectF(left, top, right, top + aboveHeight);
+        if (aboveHeight > 0) {
+            paint.setColor(Color.YELLOW);
+            if (aboveHeight < radius) {
+                canvas.drawRoundRect(aboveRect, radius, radius, paint);
+            } else {
+                canvas.save();
+                canvas.clipRect(left, top + radius, right, top + aboveHeight);
+                canvas.drawRect(aboveRect, paint);
+                canvas.restore();
+                RectF roundRect = new RectF(left, top, right, top + radius * 2);
+                canvas.drawRoundRect(roundRect, radius, radius, paint);
+            }
+        }
+        Paint textPaint = new Paint();
+        textPaint.setColor(Color.WHITE);
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(dp2px(22));
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        Paint.FontMetrics fm = textPaint.getFontMetrics();
+        float labelX = right + dp2px(12);
+        if (belowHeight > 0) {
+            String pct = String.format("%.0f%%", belowPct * 100);
+            float y = bottom - belowHeight / 2f - (fm.ascent + fm.descent) / 2;
+            canvas.drawText(pct, labelX, y, textPaint);
+        }
+        if (inHeight > 0) {
+            String pct = String.format("%.0f%%", inPct * 100);
+            float y = bottom - belowHeight - inHeight / 2f - (fm.ascent + fm.descent) / 2;
+            canvas.drawText(pct, labelX, y, textPaint);
+        }
+        if (aboveHeight > 0) {
+            String pct = String.format("%.0f%%", abovePct * 100);
+            float y = top + aboveHeight / 2f - (fm.ascent + fm.descent) / 2;
+            canvas.drawText(pct, labelX, y, textPaint);
+        }
     }
-
-    protected class RangeData {
-        public int inRange;
-        public int aboveRange;
-        public int belowRange;
-    }
-
 }
+

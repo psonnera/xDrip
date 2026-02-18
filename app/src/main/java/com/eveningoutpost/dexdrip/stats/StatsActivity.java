@@ -483,8 +483,6 @@ public class StatsActivity extends ActivityWithMenu {
             switch (i) {
                 case 0:
                     return new FirstPageFragment();
-                case 1:
-                    return new ChartFragment();
                 default:
                     return new PercentileFragment();
             }
@@ -492,7 +490,7 @@ public class StatsActivity extends ActivityWithMenu {
 
         @Override
         public int getCount() {
-            return 3;
+            return 2;
         }
 
         @Override
@@ -500,8 +498,6 @@ public class StatsActivity extends ActivityWithMenu {
             switch (position) {
                 case 0:
                     return "General";
-                case 1:
-                    return "Range Pi Chart";
                 default:
                     return "Percentile Chart";
             }

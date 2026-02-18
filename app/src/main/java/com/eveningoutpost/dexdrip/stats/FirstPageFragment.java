@@ -134,6 +134,16 @@ public class FirstPageFragment extends Fragment {
             long inRange = DBSearchUtil.noReadingsInRange(context);
             long total = aboveRange + belowRange + inRange;
 
+            // Update chart with range data
+            ChartView chartView = (ChartView) localView.findViewById(R.id.chartView);
+            if (chartView != null) {
+                if (total > 0) {
+                    chartView.setRangeData((int) inRange, (int) aboveRange, (int) belowRange);
+                } else {
+                    chartView.setRangeData(0, 0, 0);
+                }
+            }
+
             if (total == 0) {
                 total = Long.MAX_VALUE;
             }
@@ -191,7 +201,7 @@ public class FirstPageFragment extends Fragment {
                 TextView a1cView = (TextView) localView.findViewById(R.id.textView_a1c);
                 int a1c_ifcc = (int) Math.round(((mean + 46.7) / 28.7 - 2.15) * 10.929);
                 double a1c_dcct = Math.round(10 * (mean + 46.7) / 28.7) / 10d;
-                updateText(localView, a1cView, a1c_ifcc + " mmol/mol\n" + a1c_dcct + "%");
+                updateText(localView, a1cView, a1c_ifcc + " mmol/mol - " + a1c_dcct + "%");
 
 
                 for (BgReadingStats bgr : bgList) {
