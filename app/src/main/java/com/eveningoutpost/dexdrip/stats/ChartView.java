@@ -9,7 +9,11 @@ import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
 
+/**
+ * Range chart view displaying in/above/below range percentages as a stacked bar.
+ */
 public class ChartView extends View {
+
     private int inRange = 0;
     private int aboveRange = 0;
     private int belowRange = 0;
@@ -44,6 +48,7 @@ public class ChartView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
         if (calculating) {
             Paint myPaint = new Paint();
             myPaint.setColor(Color.WHITE);
@@ -53,6 +58,7 @@ public class ChartView extends View {
             canvas.drawText("Calculating...", dp2px(30), canvas.getHeight() / 2, myPaint);
             return;
         }
+
         int total = aboveRange + belowRange + inRange;
         if (total == 0) {
             Paint myPaint = new Paint();
@@ -63,22 +69,29 @@ public class ChartView extends View {
             canvas.drawText("Not enough data!", dp2px(30), canvas.getHeight() / 2, myPaint);
             return;
         }
+
+        // Calculate bar dimensions
         int barWidth = dp2px(160);
         int barHeight = Math.min(canvas.getHeight() - dp2px(40), (canvas.getWidth() / 3) * 2);
         int left = (canvas.getWidth() - barWidth) / 2;
         int top = (canvas.getHeight() - barHeight) / 2;
         int right = left + barWidth;
         int bottom = top + barHeight;
+
+        // Calculate percentages and heights
         float belowPct = (float) belowRange / total;
         float inPct = (float) inRange / total;
         float abovePct = (float) aboveRange / total;
         int belowHeight = Math.round(barHeight * belowPct);
         int inHeight = Math.round(barHeight * inPct);
         int aboveHeight = barHeight - belowHeight - inHeight;
+
         Paint paint = new Paint();
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.FILL);
         float radius = 5f;
+
+        // Draw below range (red, bottom, rounded bottom)
         RectF belowRect = new RectF(left, bottom - belowHeight, right, bottom);
         if (belowHeight > 0) {
             paint.setColor(Color.RED);
@@ -93,10 +106,14 @@ public class ChartView extends View {
                 canvas.drawRoundRect(roundRect, radius, radius, paint);
             }
         }
+
+        // Draw in range (green, middle)
         if (inHeight > 0) {
             paint.setColor(Color.GREEN);
             canvas.drawRect(left, bottom - belowHeight - inHeight, right, bottom - belowHeight, paint);
         }
+
+        // Draw above range (yellow, top, rounded top)
         RectF aboveRect = new RectF(left, top, right, top + aboveHeight);
         if (aboveHeight > 0) {
             paint.setColor(Color.YELLOW);
@@ -111,6 +128,8 @@ public class ChartView extends View {
                 canvas.drawRoundRect(roundRect, radius, radius, paint);
             }
         }
+
+        // Draw percentage labels
         Paint textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
         textPaint.setAntiAlias(true);
@@ -118,6 +137,7 @@ public class ChartView extends View {
         textPaint.setTextAlign(Paint.Align.LEFT);
         Paint.FontMetrics fm = textPaint.getFontMetrics();
         float labelX = right + dp2px(12);
+
         if (belowHeight > 0) {
             String pct = String.format("%.0f%%", belowPct * 100);
             float y = bottom - belowHeight / 2f - (fm.ascent + fm.descent) / 2;
