@@ -1608,6 +1608,14 @@ public class Ob1G5CollectionService extends G5BaseService {
             case DISCONNECTED:
                 connection_state = "Disconnected";
                 JoH.releaseWakeLock(floatingWakeLock);
+                // Fallback if BLE state dropped but connect flow did not fail-cleanly.
+                if ((state == CONNECT || state == CONNECT_NOW)
+                        && msSince(last_connect_started) > Constants.SECOND_IN_MS * 10
+                        && JoH.ratelimit("ob1-disconnect-fallback-retry", 5)) {
+                    UserError.Log.e(TAG, "Fallback retry: disconnected while connecting, forcing scan");
+                    stopConnect();
+                    changeState(SCAN);
+                }
                 break;
         }
         static_connection_state = connection_state;
