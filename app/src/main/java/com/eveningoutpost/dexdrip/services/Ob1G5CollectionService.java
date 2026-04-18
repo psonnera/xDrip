@@ -30,6 +30,7 @@ import static com.eveningoutpost.dexdrip.models.JoH.tsl;
 import static com.eveningoutpost.dexdrip.models.JoH.upForAtLeastMins;
 import static com.eveningoutpost.dexdrip.plugin.Dialog.txIdMatch;
 import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.BOND;
+import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.CHECK_AUTH;
 import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.CLOSE;
 import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.CLOSED;
 import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.CONNECT;
@@ -38,7 +39,9 @@ import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.D
 import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.GET_DATA;
 import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.INIT;
 import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.PREBOND;
+import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.RESET;
 import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.SCAN;
+import static com.eveningoutpost.dexdrip.services.Ob1G5CollectionService.STATE.UNBOND;
 import static com.eveningoutpost.dexdrip.utilitymodels.Constants.DAY_IN_MS;
 import static com.eveningoutpost.dexdrip.utilitymodels.Constants.G5_CALIBRATION_REQUEST;
 import static com.eveningoutpost.dexdrip.utilitymodels.Constants.G5_SENSOR_FAILED;
