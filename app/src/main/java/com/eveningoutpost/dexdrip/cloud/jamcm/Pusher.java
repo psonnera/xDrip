@@ -537,9 +537,11 @@ public class Pusher {
                 return false;
             }
 
+            val id = JamCm.getId();
             val msg = Xdrip.SyncMsg.newBuilder()
                     .setAction(input.getString("action"))
                     .setPayload(ByteString.copyFrom(Base64.decode(input.getString("payload"), Base64.NO_WRAP)))
+                    .setFrom(id != null ? id : "")
                     .build().toByteArray();
 
             val trans = Xdrip.Transport.newBuilder()
