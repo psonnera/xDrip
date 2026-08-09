@@ -69,6 +69,7 @@ public class ImportAapsProfile {
                 UserError.Log.wtf(TAG, "Mismatched units mmol vs mgdl between AAPS and xDrip");
             }
             if (Pref.getBooleanDefaultFalse("profile_import_sound")) {
+                UserError.Log.uel(TAG, "Playing labbed_musical_chime via importAndSaveFromMap() — conditions: pjo.looksReasonable(), profile_import_sound pref enabled");
                 BackgroundQueue.post(() -> JoH.playSoundUri(JoH.getResourceURI(R.raw.labbed_musical_chime)));
             }
             UserError.Log.e(TAG, "xDrip imported AAPS profile");

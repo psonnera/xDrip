@@ -226,6 +226,7 @@ public class GluProService extends ForegroundService {
                 case BONDED:
                     // play success noise on bonding being achieved
                     if (pratelimit("glu-pro-bonded", 30)) {
+                        UserError.Log.uel(TAG, "Playing labbed_musical_chime via onState() — conditions: state==BONDED, pratelimit(glu-pro-bonded,30)");
                         JoH.playResourceAudio(R.raw.labbed_musical_chime);
                     }
 

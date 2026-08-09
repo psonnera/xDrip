@@ -86,6 +86,7 @@ public class HeadsetStateReceiver extends BroadcastReceiver {
             if (VehicleMode.shouldUseSpeech()) {
                 SpeechUtil.say(" X Drip " + TWICE_DELIMITER, 500);
             } else if (VehicleMode.shouldPlaySound()) {
+                UserError.Log.uel(TAG, "Playing labbed_musical_chime via audioNotification() — conditions: VehicleMode.isVehicleModeActive(), !shouldUseSpeech(), shouldPlaySound()");
                 JoH.playResourceAudio(R.raw.labbed_musical_chime);
             }
         }

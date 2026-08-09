@@ -33,6 +33,7 @@ public class FindNearby implements BtCallBack {
                 InPen.setMac(mac);
                 InPenEntry.startWithRefresh();
                 if (JoH.ratelimit("found-inpen-first-time",86000)) {
+                    UserError.Log.uel(TAG, "Playing labbed_musical_chime via btCallback() — conditions: status==SCAN_FOUND_CALLBACK, ratelimit(found-inpen-first-time,86000)");
                     JoH.playResourceAudio(R.raw.labbed_musical_chime);
                 }
                 break;

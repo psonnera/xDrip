@@ -1340,7 +1340,10 @@ public class Ob1G5CollectionService extends G5BaseService {
             final String ref = "last-ob1-data-" + transmitterID;
             if (PersistentStore.getLong(ref) == 0) {
                 PersistentStore.setLong(ref, timestamp);
-                if (!android_wear) JoH.playResourceAudio(R.raw.labbed_musical_chime);
+                if (!android_wear) {
+                    UserError.Log.uel(TAG, "Playing labbed_musical_chime via updateLast() — conditions: static_last_timestamp==0, transmitterID!=null, first data for transmitter, !android_wear");
+                    JoH.playResourceAudio(R.raw.labbed_musical_chime);
+                }
             }
         }
         static_last_timestamp = timestamp;
